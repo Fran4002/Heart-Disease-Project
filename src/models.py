@@ -85,10 +85,13 @@ def build_lightgbm_pipeline(
 def calibrate_model(
     base_estimator,
     method: str = "sigmoid",
-    cv: str = "prefit",
+    cv: Any = "prefit",
 ) -> CalibratedClassifierCV:
     """
     Wraps an estimator with Scikit-Learn's CalibratedClassifierCV.
+    
+    Supports both modern scikit-learn (using FrozenEstimator for prefit models)
+    and legacy scikit-learn (using cv='prefit').
     
     Methods:
     - 'sigmoid' (Platt Scaling): Fits logistic regression mapping model output to probabilities.
@@ -96,6 +99,19 @@ def calibrate_model(
     - 'isotonic' (Isotonic Regression): Non-parametric monotonic step function.
       More flexible but requires larger validation samples to avoid overfitting.
     """
+    if cv == "prefit":
+        try:
+            from sklearn.frozen import FrozenEstimator
+            return CalibratedClassifierCV(
+                estimator=FrozenEstimator(base_estimator),
+                method=method,
+            )
+        except (ImportError, AttributeError):
+            return CalibratedClassifierCV(
+                estimator=base_estimator,
+                method=method,
+                cv="prefit",
+            )
     return CalibratedClassifierCV(
         estimator=base_estimator,
         method=method,

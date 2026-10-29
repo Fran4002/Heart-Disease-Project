@@ -98,10 +98,10 @@ def plot_roc_pr_comparison(
             continue
 
         RocCurveDisplay.from_predictions(
-            y_eval, y_proba, name=name, ax=axes[0], color=color
+            y_eval, y_proba, name=name, ax=axes[0]
         )
         PrecisionRecallDisplay.from_predictions(
-            y_eval, y_proba, name=name, ax=axes[1], color=color
+            y_eval, y_proba, name=name, ax=axes[1]
         )
 
     # Reference lines

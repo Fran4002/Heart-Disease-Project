@@ -474,15 +474,24 @@ plot_roc_pr_comparison(models, X_val, y_val)"""),
         cell("markdown", r"""### 🛠️ Ejercicio 3.1: Calibración de Probabilidades con `CalibratedClassifierCV`
 En aplicaciones de salud pública y clínicas, no basta con predecir 0 o 1: se requiere una probabilidad empírica confiable (estimador de riesgo continuo $\hat{P}(Y=1 \mid X)$).
 
+> **Nota sobre Scikit-Learn moderno:** En versiones recientes de scikit-learn, el parámetro `cv='prefit'` fue reemplazado por `FrozenEstimator` (`from sklearn.frozen import FrozenEstimator`). La función auxiliar `calibrate_model()` gestiona automáticamente esta compatibilidad interna.
+
 **Tu tarea:**
-1. Aplica `calibrate_model()` (o directamente `CalibratedClassifierCV`) al mejor modelo (ej. `lgb_model`).
-2. Ajusta el calibrador utilizando el conjunto de validación (`cv='prefit'`) o validación cruzada interna.
+1. Aplica `calibrate_model()` (o directamente `CalibratedClassifierCV` con `FrozenEstimator`) al mejor modelo (ej. `lgb_model`).
+2. Ajusta el calibrador utilizando el conjunto de validación (`X_val, y_val`).
 3. Evalúa la reducción en el **Brier Score** (donde un valor menor indica mejor calibración).
 4. Utiliza `plot_calibration_curves()` para comparar la curva de confiabilidad antes y después de calibrar."""),
 
         cell("code", """# TODO: Calibra el modelo seleccionado y compara Brier Score y curvas de confiabilidad
-cal_lgb = calibrate_model(lgb_model, method='sigmoid', cv='prefit')
+# Opción 1: Utilizando el helper calibrate_model (compatible con FrozenEstimator internamente)
+cal_lgb = calibrate_model(lgb_model, method='sigmoid')
 cal_lgb.fit(X_val, y_val)
+
+# Opción 2 equivalente directa en scikit-learn moderno:
+# from sklearn.frozen import FrozenEstimator
+# from sklearn.calibration import CalibratedClassifierCV
+# cal_lgb = CalibratedClassifierCV(estimator=FrozenEstimator(lgb_model), method='sigmoid')
+# cal_lgb.fit(X_val, y_val)
 
 # Probabilidades estimadas en validación
 val_proba_uncal = lgb_model.predict_proba(X_val)[:, 1]
